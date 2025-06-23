@@ -21,7 +21,7 @@ Clone the repository:
 bash
 Copy
 Edit
-git clone https://github.com/yourusername/friends-form-ts-tailwind.git
+git clone https://github.com/maribukh/friends-form-ts-tailwind.git
 Navigate into the project directory:
 
 bash
