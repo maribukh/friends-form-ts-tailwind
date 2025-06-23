@@ -10,7 +10,6 @@ function toggleButton(): void {
   } else {
     form.classList.remove('animate-slide-down');
     form.classList.add('animate-slide-up');
-
     setTimeout(() => {
       form.classList.add('hidden');
     }, 400);
@@ -23,7 +22,6 @@ function updateEmptyMessageVisibility(): void {
   if (!message || !list) return;
 
   const hasCards = list.querySelectorAll('.card').length > 0;
-
   if (hasCards) {
     message.classList.add('opacity-0', '-translate-y-2');
     message.classList.remove('opacity-100', 'translate-y-0');
@@ -33,8 +31,64 @@ function updateEmptyMessageVisibility(): void {
   }
 }
 
-function addCard(): void {
+function saveToStorage(friend: Friend): void {
+  const existing = JSON.parse(
+    localStorage.getItem('friends') || '[]'
+  ) as Friend[];
+  existing.push(friend);
+  localStorage.setItem('friends', JSON.stringify(existing));
+}
+
+function removeFromStorage(friend: Friend): void {
+  const existing = JSON.parse(
+    localStorage.getItem('friends') || '[]'
+  ) as Friend[];
+  const filtered = existing.filter(
+    (f) =>
+      f.name !== friend.name ||
+      f.lastName !== friend.lastName ||
+      f.age !== friend.age
+  );
+  localStorage.setItem('friends', JSON.stringify(filtered));
+}
+
+function createCard(friend: Friend): void {
   const list = document.getElementById('friendsList');
+  if (!list) return;
+
+  const card = document.createElement('div');
+  card.className = `
+    card 
+    w-full 
+    sm:w-[280px] 
+    md:w-[100%] 
+    bg-white p-6 rounded-lg shadow-md flex justify-between
+  `;
+
+  card.innerHTML = `
+    <div class="about-person">
+      <p class="font-semibold text-lg">სახელი: <span class="text-gray-600">${friend.name}</span></p>
+      <p class="font-semibold text-lg">გვარი: <span class="text-gray-600">${friend.lastName}</span></p>
+      <p class="font-semibold text-lg">ასაკი: <span class="text-gray-600">${friend.age}</span></p>
+      <p class="font-semibold text-lg">მეგობრები: <span class="text-gray-600">${friend.friends.join(', ')}</span></p>
+    </div>
+    <div>
+      <span class="material-symbols-outlined text-red-600 cursor-pointer close-btn">close</span>
+    </div>
+  `;
+
+  const closeBtn = card.querySelector('.close-btn');
+  closeBtn?.addEventListener('click', () => {
+    card.remove();
+    removeFromStorage(friend);
+    updateEmptyMessageVisibility();
+  });
+
+  list.appendChild(card);
+  updateEmptyMessageVisibility();
+}
+
+function addCard(): void {
   const nameInput = document.getElementById('name') as HTMLInputElement | null;
   const lastNameInput = document.getElementById(
     'lastName'
@@ -44,8 +98,7 @@ function addCard(): void {
     'friends'
   ) as HTMLInputElement | null;
 
-  if (!list || !nameInput || !lastNameInput || !ageInput || !friendsInput)
-    return;
+  if (!nameInput || !lastNameInput || !ageInput || !friendsInput) return;
 
   const capitalize = (text: string) =>
     text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
@@ -73,35 +126,8 @@ function addCard(): void {
     friends: friendsStr ? friendsStr.split(',').map((f) => f.trim()) : [],
   };
 
-  const card = document.createElement('div');
-  card.className = `
-    card 
-    w-full 
-    sm:w-[280px] 
-    md:w-[100%] 
-    bg-white p-6 rounded-lg shadow-md flex justify-between
-  `;
-
-  card.innerHTML = `
-    <div class="about-person">
-      <p class="font-semibold text-lg">სახელი: <span class="text-gray-600">${newFriend.name}</span></p>
-      <p class="font-semibold text-lg">გვარი: <span class="text-gray-600">${newFriend.lastName}</span></p>
-      <p class="font-semibold text-lg">ასაკი: <span class="text-gray-600">${newFriend.age}</span></p>
-      <p class="font-semibold text-lg">მეგობრები: <span class="text-gray-600">${newFriend.friends.join(', ')}</span></p>
-    </div>
-    <div>
-      <span class="material-symbols-outlined text-red-600 cursor-pointer close-btn">close</span>
-    </div>
-  `;
-
-  const closeBtn = card.querySelector('.close-btn');
-  closeBtn?.addEventListener('click', () => {
-    card.remove();
-    updateEmptyMessageVisibility();
-  });
-
-  list.appendChild(card);
-  updateEmptyMessageVisibility();
+  createCard(newFriend);
+  saveToStorage(newFriend);
 
   const form = document.getElementById('friendForm') as HTMLFormElement | null;
   form?.reset();
@@ -111,10 +137,15 @@ function addCard(): void {
 document.addEventListener('DOMContentLoaded', () => {
   updateEmptyMessageVisibility();
 
+  const stored = localStorage.getItem('friends');
+  if (stored) {
+    const friends: Friend[] = JSON.parse(stored);
+    friends.forEach(createCard);
+  }
+
   const addBtn = document.querySelector<HTMLButtonElement>('#addFriendBtn');
   const toggleBtn = document.querySelector<HTMLButtonElement>('#toggleForm');
   const closeFormBtn = document.getElementById('formCloseBtn');
-  closeFormBtn?.addEventListener('click', toggleButton);
 
   addBtn?.addEventListener('click', addCard);
   toggleBtn?.addEventListener('click', toggleButton);
