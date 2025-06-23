@@ -21,7 +21,7 @@
 
       <div
         id="friendsList"
-        class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full justify-items-center"
       ></div>
 
       <div
@@ -37,7 +37,6 @@
 
       <div class="flex justify-center mt-6 w-full">
         <button
-          onclick="toggleButton()"
           id="toggleForm"
           class="py-3 px-6 bg-blue-500 text-white rounded-md font-semibold shadow-md hover:bg-blue-600 transition cursor-pointer w-full max-w-xs"
         >
@@ -54,10 +53,11 @@
             ახალი მეგობრის დამატება
           </h2>
           <span
-            onclick="toggleButton()"
+            id="formCloseBtn"
             class="material-symbols-outlined text-red-600 cursor-pointer"
-            >close</span
           >
+            close
+          </span>
         </div>
 
         <div class="flex flex-col gap-4">
@@ -89,8 +89,8 @@
 
         <div class="flex justify-center mt-4">
           <button
+            id="addFriendBtn"
             type="button"
-            onclick="addCard()"
             class="py-3 px-6 bg-green-500 text-white rounded-md font-semibold shadow-md hover:bg-green-600 transition cursor-pointer w-full max-w-xs"
           >
             დამატება
@@ -99,6 +99,6 @@
       </form>
     </div>
 
-    <script src="./dist/main.js"></script>
+    <script type="module" src="./dist/main.js"></script>
   </body>
 </html>
